@@ -1,0 +1,5 @@
+# No external dependencies required for core functionality
+# This project uses only Python standard library
+
+# Optional: for test coverage reporting
+coverage>=7.0
