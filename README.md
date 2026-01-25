@@ -2,7 +2,7 @@
 
 Find the closest airport to any location on Earth.
 
-![Tests](https://github.com/YOUR_USERNAME/airport-finder/actions/workflows/tests.yml/badge.svg)
+![Tests](https://github.com/millerjd-netizen/ECE_530/actions/workflows/tests.yml/badge.svg)
 
 ## Features
 
