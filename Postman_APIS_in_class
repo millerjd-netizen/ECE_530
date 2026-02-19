@@ -1,0 +1,109 @@
+# main.py
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import requests
+
+app = FastAPI(title="REST In-class (All-in-one)")
+
+# --------- Models ---------
+class UserIn(BaseModel):
+    username: str
+
+class NoteIn(BaseModel):
+    text: str
+
+# --------- In-memory store ---------
+users = {}          # id -> {"id": int, "username": str}
+uname_to_id = {}    # username -> id
+notes = {}          # user_id -> [{"id": int, "user_id": int, "text": str}]
+uid = 1
+nid = 1
+
+# --------- Exercise 2: Users + Notes ---------
+@app.post("/users", status_code=201)
+def create_user(u: UserIn):
+    global uid
+    name = u.username.strip()
+    if not name:
+        raise HTTPException(422, "username required")
+    if name in uname_to_id:
+        raise HTTPException(409, "Username already exists")
+    user = {"id": uid, "username": name}
+    users[uid] = user
+    uname_to_id[name] = uid
+    notes[uid] = []
+    uid += 1
+    return user
+
+@app.get("/users/{user_id}")
+def get_user(user_id: int):
+    if user_id not in users:
+        raise HTTPException(404, "User not found")
+    return users[user_id]
+
+@app.get("/users")
+def list_users():
+    return list(users.values())
+
+@app.post("/users/{user_id}/notes", status_code=201)
+def add_note(user_id: int, n: NoteIn):
+    global nid
+    if user_id not in users:
+        raise HTTPException(404, "User not found")
+    text = n.text.strip()
+    if not text:
+        raise HTTPException(422, "text required")
+    note = {"id": nid, "user_id": user_id, "text": text}
+    notes[user_id].append(note)
+    nid += 1
+    return note
+
+@app.get("/users/{user_id}/notes")
+def read_notes(user_id: int):
+    if user_id not in users:
+        raise HTTPException(404, "User not found")
+    return notes[user_id]
+
+# --------- Exercise 1 + Final: openFDA -> save as note ---------
+@app.post("/users/{user_id}/notes/from-fda", status_code=201)
+def add_note_from_fda(user_id: int, active_ingredient: str, limit: int = 3, skip: int = 0):
+    global nid
+    if user_id not in users:
+        raise HTTPException(404, "User not found")
+
+    base = "https://api.fda.gov/drug/label.json"
+    params = {"search": f"active_ingredient:{active_ingredient}", "limit": limit, "skip": skip}
+    r = requests.get(base, params=params, timeout=20)
+
+    if r.status_code == 404:  # openFDA uses 404 for no results
+        summary = {"query": params["search"], "limit": limit, "skip": skip, "total": 0, "items": []}
+    else:
+        r.raise_for_status()
+        data = r.json()
+        total = data.get("meta", {}).get("results", {}).get("total", 0)
+        items = []
+        for it in data.get("results", []):
+            ofda = it.get("openfda", {})
+            items.append({
+                "brand": (ofda.get("brand_name") or [None])[0],
+                "generic": (ofda.get("generic_name") or [None])[0],
+                "mfg": (ofda.get("manufacturer_name") or [None])[0],
+                "purpose": (it.get("purpose") or [None])[0],
+            })
+        summary = {"query": params["search"], "limit": limit, "skip": skip, "total": total, "items": items}
+
+    note = {"id": nid, "user_id": user_id, "text": str(summary)}
+    notes[user_id].append(note)
+    nid += 1
+    return note
+
+"""
+RUN:
+  pip install fastapi uvicorn requests
+  uvicorn main:app --reload
+
+QUICK TEST:
+  curl -X POST http://127.0.0.1:8000/users -H "Content-Type: application/json" -d '{"username":"alice"}'
+  curl -X POST "http://127.0.0.1:8000/users/1/notes/from-fda?active_ingredient=ibuprofen&limit=3&skip=0"
+  curl http://127.0.0.1:8000/users/1/notes
+"""
