@@ -10,3 +10,12 @@ your-repo/
 │   ├── sql_validator.py
 │   ├── llm_adapter.py
 │   └── cli.py
+├── tests/
+│   ├── __init__.py
+│   ├── test_csv_loader.py
+│   ├── test_schema_manager.py
+│   ├── test_query_service.py
+│   ├── test_sql_validator.py
+│   └── test_llm_adapter.py
+├── requirements.txt
+└── README.md
