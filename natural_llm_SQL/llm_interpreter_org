@@ -19,3 +19,13 @@ your-repo/
 │   └── test_llm_adapter.py
 ├── requirements.txt
 └── README.md
+
+
+
+## user story
+
+how many children are in the cincionanit school base between teh ages of 5 and 7? This runs through the llm to make sql code, from llm adatper to query service, then goes to SQL
+
+Brances. Data loading and query. Query is when your asking soemtrhinng about the data base. WE need infamrtion out of something.  
+
+          Data ladoing is putting data in the sql. 
