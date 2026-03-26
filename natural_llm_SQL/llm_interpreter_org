@@ -31,3 +31,6 @@ Brances. Data loading and query. Query is when your asking soemtrhinng about the
           Query is the one line of the bit of code you sent to retreive the data. 
 
           Data ladoing is putting data in the sql. 
+
+
+User - puncch data into command line - then it goes to LLM to trnalte englsht to SQL. - then needs to go past security (validator) - then goes to sql and then it changes to retrieves. it modified teh dataset or just retreives it. 
