@@ -10,5 +10,8 @@ class QueryService:
     conn.row_factory = sqlite3.Row
   if not validation.is_valid:
     return (validation.error)
-    
+  conn = sqlite3.connect(self.db_path)
+  conn.row_factory = sqlite3.Row
+  cursor = conn.execute(sql)  
+  conn.close()
   
