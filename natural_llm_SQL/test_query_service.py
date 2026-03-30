@@ -14,4 +14,9 @@ class QueryService:
   conn.row_factory = sqlite3.Row
   cursor = conn.execute(sql)  
   conn.close()
+ def get_schema_context(self)
+  conn = sqlite3.connect(self.db_path)
+  tables = self._schema_manager.list_tables(conn)
+  return {table: self._schema_manager.get_schema(conn, table) for (table in tables)}
+  
   
