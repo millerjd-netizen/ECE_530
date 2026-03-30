@@ -7,5 +7,5 @@ class SchemaManager:
     col_defs = ["Primary Key"]
     for col in schema:
       col_defs.append(f"{col['name'] col['type']}")
-  conn.execute(f"CREATE TABLE {schema.table_name) ({', ', join(col_defs)})
+  conn.execute(f"CREATE TABLE {table_name} ({', '.join(col_defs)})")
   
