@@ -10,4 +10,7 @@ class SchemaManager:
     conn.execute(f"CREATE TABLE {table_name} ({', '.join(col_defs)})")
   def drop_table(self, conn, table_name)
     conn.execute(f"DROP TABLE {table_name}")
+  def rename_table(self, conn, table_name)
+    conn.execute(f"ALTER TABLE {old_name} RENAME TO {new_name}")
+    
   
