@@ -7,5 +7,7 @@ class SchemaManager:
     col_defs = ["Primary Key"]
     for col in schema:
       col_defs.append(f"{col['name'] col['type']}")
-  conn.execute(f"CREATE TABLE {table_name} ({', '.join(col_defs)})")
+    conn.execute(f"CREATE TABLE {table_name} ({', '.join(col_defs)})")
+  def drop_table(self, conn, table_name)
+    conn.execute(f"DROP TABLE {table_name}")
   
