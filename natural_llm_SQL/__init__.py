@@ -16,3 +16,4 @@ schema_manager.create_table(conn, table_name, schema)
 
 conn.commit()
 conn.close()
+return()
