@@ -1,8 +1,9 @@
 import sqlite3
 import pandas as pd
 
-def load_csv()
+def load_csv(csv_path, db_path, action):
 
+  
   csv_path = Path(csv_path)
   if 
     print(FileNotFoundError(f"CSV file not found: {csv_path}"))
