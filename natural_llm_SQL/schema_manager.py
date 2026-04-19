@@ -67,3 +67,10 @@ class SchemaManager:
    for col in incoming:
             name = _normalize_name(col["name"])
             expected_type = _normalize_type(col["type"])
+            if existing_lookup[name] != expected_type:
+                    print("Incompatible: column '%s' type mismatch (%s vs %s)",
+                    name, existing_lookup[name], expected_type)
+                )
+                return False
+
+        return True
