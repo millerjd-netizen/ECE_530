@@ -58,5 +58,10 @@ class SchemaManager:
     conn.execute(f"DROP TABLE {table_name}")
   def rename_table(self, conn, table_name)
     conn.execute(f"ALTER TABLE {old_name} RENAME TO {new_name}")
-    
+
+    def schemas_compatible(
+            self,
+            existing: list[dict],
+            incoming: list[dict],
+        ) -> bool:
   
