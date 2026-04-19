@@ -33,7 +33,13 @@ def _normalize_name(name: str) -> str:
 
 class SchemaManager:
   def list_tables(self, conn)
-  def get_schema(self, conn, table_name)
+     cursor = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+        )
+    return [row[0] for row in cursor.fetchall()]
+  def get_schema(
+        self, conn: sqlite3.Connection, table_name: str
+    ) -> list[dict]:
   def create_table(self, schema)
     col_defs = ["Primary Key"]
     for col in schema:
