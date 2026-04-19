@@ -24,3 +24,13 @@ def mock_schema_manager():
     sm.create_table.side_effect = _create_table
     sm.drop_table.side_effect = _drop_table
     return sm
+
+
+
+# read CSV
+class TestReadCsv:
+    def
+    def
+    def
+    def
+    
