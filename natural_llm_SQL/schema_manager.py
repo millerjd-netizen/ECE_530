@@ -64,4 +64,6 @@ class SchemaManager:
             existing: list[dict],
             incoming: list[dict],
         ) -> bool:
-  
+   for col in incoming:
+            name = _normalize_name(col["name"])
+            expected_type = _normalize_type(col["type"])
