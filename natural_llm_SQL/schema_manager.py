@@ -74,3 +74,8 @@ class SchemaManager:
                 return False
 
         return True
+
+ def drop_table(self, conn: sqlite3.Connection, table_name: str) -> None:
+     conn.execute(f"DROP TABLE IF EXISTS {table_name}")
+     
+
