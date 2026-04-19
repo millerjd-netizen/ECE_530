@@ -40,6 +40,15 @@ class SchemaManager:
   def get_schema(
         self, conn: sqlite3.Connection, table_name: str
     ) -> list[dict]:
+    
+        cursor = conn.execute(f"PRAGMA table_info({table_name})")
+        rows = cursor.fetchall()
+         return [
+            {
+                "name": row[1],
+                "type": _normalize_type(row[2])",
+                "pk": row[5],
+            }
   def create_table(self, schema)
     col_defs = ["Primary Key"]
     for col in schema:
