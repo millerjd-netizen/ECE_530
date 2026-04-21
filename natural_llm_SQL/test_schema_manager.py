@@ -82,5 +82,80 @@ class TestTableExists:
     def test_case_sensitive(self, sm, conn_with_people):
         # SQLite table names are case-sensitive in sqlite_master
         assert sm.table_exists(conn_with_people, "People") is False
+class TestGetSchema:
+    def test_returns_correct_columns(self, sm, conn_with_people):
+        schema = sm.get_schema(conn_with_people, "people")
+        names = [c["name"] for c in schema]
+        assert "id" in names
+        assert "name" in names
+        assert "age" in names
+        assert "score" in names
+
+    def test_returns_correct_types(self, sm, conn_with_people):
+        schema = sm.get_schema(conn_with_people, "people")
+        lookup = {c["name"]: c["type"] for c in schema}
+        assert lookup["name"] == "TEXT"
+        assert lookup["age"] == "INTEGER"
+        assert lookup["score"] == "REAL"
+
+    def test_id_marked_as_primary_key(self, sm, conn_with_people):
+        schema = sm.get_schema(conn_with_people, "people")
+        pk_cols = [c["name"] for c in schema if c["pk"] == 1]
+        assert "id" in pk_cols
+
+    def test_raises_for_missing_table(self, sm, conn):
+        with pytest.raises(ValueError, match="does not exist"):
+            sm.get_schema(conn, "ghost")
+
+class TestCreateTable:
+    def test_creates_table(self, sm, conn):
+        sm.create_table(conn, "products", [{"name": "title", "type": "TEXT"}])
+        assert sm.table_exists(conn, "products")
+
+    def test_auto_id_column_added(self, sm, conn):
+        sm.create_table(conn, "t", [{"name": "x", "type": "TEXT"}])
+        schema = sm.get_schema(conn, "t")
+        names = [c["name"] for c in schema]
+        assert "id" in names
+
+    def test_id_is_primary_key(self, sm, conn):
+        sm.create_table(conn, "t", [{"name": "x", "type": "TEXT"}])
+        schema = sm.get_schema(conn, "t")
+        pk = [c for c in schema if c["pk"] == 1]
+        assert len(pk) == 1
+        assert pk[0]["name"] == "id"
+
+    def test_all_columns_present(self, sm, conn):
+        cols = [
+            {"name": "name", "type": "TEXT"},
+            {"name": "age", "type": "INTEGER"},
+            {"name": "score", "type": "REAL"},
+        ]
+        sm.create_table(conn, "people", cols)
+        schema = sm.get_schema(conn, "people")
+        names = [c["name"] for c in schema]
+        assert "name" in names
+        assert "age" in names
+        assert "score" in names
+
+    def test_raises_on_empty_schema(self, sm, conn):
+        with pytest.raises(ValueError, match="empty schema"):
+            sm.create_table(conn, "t", [])
+
+    def test_normalizes_types_on_creation(self, sm, conn):
+        sm.create_table(conn, "t", [{"name": "val", "type": "FLOAT"}])
+        schema = sm.get_schema(conn, "t")
+        lookup = {c["name"]: c["type"] for c in schema}
+        assert lookup["val"] == "REAL"
+
+class TestDropTable:
+    def test_drops_existing_table(self, sm, conn_with_people):
+        sm.drop_table(conn_with_people, "people")
+        assert sm.table_exists(conn_with_people, "people") is False
+
+    def test_drop_nonexistent_table_does_not_raise(self, sm, conn):
+        # IF EXISTS means this should be a no-op
+        sm.drop_table(conn, "ghost")  # should not raise
+
 
 
