@@ -271,6 +271,7 @@ class SchemaManager:
     def rename_table(
         self, conn: sqlite3.Connection, old_name: str, new_name: str
     ) -> None:
-       
+        if not self.table_exists(conn, old_name):
+            raise ValueError(f"Table '{old_name}' does not exist.")
         conn.execute(f"ALTER TABLE {old_name} RENAME TO {new_name}")
        
