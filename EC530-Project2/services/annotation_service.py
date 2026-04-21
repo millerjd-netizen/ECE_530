@@ -25,15 +25,29 @@ def main():
     
     logger.info("Annotation Service listening on inference.completed...")
 
-
+#this logs a message to show that the service has started and is listening for infrenece result. inference = figuring something out from data. 
 
 
     for message in pubsub.listen():
+
+# Try to process the message safely without crashing. 
         try:
+
+# this logic is to try to run this code without it crashing.
+
+            
             event = parse_message(message)
+
+# turns raw messages into strucutres events. that what parsing does
+
+
+            
             if event is None:
                 continue
+                
+# if theres nothing it just skips
 
+            
             logger.info("Annotation Service received: %s", event)
 
             annotation = {
