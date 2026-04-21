@@ -1,4 +1,7 @@
 import sqlite3
+import logging
+from dataclasses import dataclass, field
+logger = logging.getLogger(__name__)
 class QueryService:
   def __init__(self, db_path, validator, schema_manager):
     self.db_path = db_path
