@@ -1,10 +1,23 @@
 def test_annotation_format():
+
+# first defines a funciton, which will tests the annotaiotn service by a readable string. 
+    
     event = {
         "event_id": "evt_1",
+        # unique id for tracking each event 
+
+        
         "image_id": "img_1",
+
+        # id taht idenfifies each image 
         "path": "images/test.jpg",
+
+        # locaiton 
         "label": "cat",
+        # descprtion of th inferince service 
         "confidence": 0.95
+
+        # 
     }
 
     annotation = {
