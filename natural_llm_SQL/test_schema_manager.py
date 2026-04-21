@@ -157,5 +157,57 @@ class TestDropTable:
         # IF EXISTS means this should be a no-op
         sm.drop_table(conn, "ghost")  # should not raise
 
+class TestRenameTable:
+    def test_renames_table(self, sm, conn_with_people):
+        sm.rename_table(conn_with_people, "people", "persons")
+        assert sm.table_exists(conn_with_people, "persons")
+        assert sm.table_exists(conn_with_people, "people") is False
+
+    def test_raises_if_source_missing(self, sm, conn):
+        with pytest.raises(ValueError, match="does not exist"):
+            sm.rename_table(conn, "ghost", "new_name")
+
+class TestSchemasCompatible:
+    def _schema(self, *cols):
+        """Helper: build a schema list from (name, type) tuples."""
+        return [{"name": n, "type": t} for n, t in cols]
+
+    def test_identical_schemas_are_compatible(self, sm):
+        s = self._schema(("name", "TEXT"), ("age", "INTEGER"))
+        assert sm.schemas_compatible(s, s) is True
+
+    def test_extra_column_in_existing_is_ok(self, sm):
+        existing = self._schema(("id", "INTEGER"), ("name", "TEXT"), ("age", "INTEGER"))
+        incoming = self._schema(("name", "TEXT"), ("age", "INTEGER"))
+        assert sm.schemas_compatible(existing, incoming) is True
+
+    def test_missing_column_in_existing_is_incompatible(self, sm):
+        existing = self._schema(("name", "TEXT"))
+        incoming = self._schema(("name", "TEXT"), ("age", "INTEGER"))
+        assert sm.schemas_compatible(existing, incoming) is False
+
+    def test_type_mismatch_is_incompatible(self, sm):
+        existing = self._schema(("age", "TEXT"))   # wrong type
+        incoming = self._schema(("age", "INTEGER"))
+        assert sm.schemas_compatible(existing, incoming) is False
+
+    def test_case_insensitive_column_names(self, sm):
+        existing = self._schema(("Name", "TEXT"), ("Age", "INTEGER"))
+        incoming = self._schema(("name", "TEXT"), ("age", "INTEGER"))
+        assert sm.schemas_compatible(existing, incoming) is True
+
+    def test_type_aliases_are_compatible(self, sm):
+        # FLOAT in incoming should match REAL in existing
+        existing = self._schema(("score", "REAL"))
+        incoming = self._schema(("score", "FLOAT"))
+        assert sm.schemas_compatible(existing, incoming) is True
+
+    def test_empty_incoming_is_incompatible(self, sm):
+        existing = self._schema(("name", "TEXT"))
+        assert sm.schemas_compatible(existing, []) is False
+
+    def test_empty_existing_with_nonempty_incoming_is_incompatible(self, sm):
+        incoming = self._schema(("name", "TEXT"))
+        assert sm.schemas_compatible([], incoming) is False
 
 
