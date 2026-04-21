@@ -1,6 +1,22 @@
 # EC530 Project 2
 ## Event-Driven Image Annotation System (Redis Pub/Sub)
 
+
+## ⚠️ Project Scope
+
+This project focuses on defining the messaging skeleton of an event-driven system.
+
+The goal is to:
+- define services
+- define message formats
+- simulate event flow
+- test communication using Redis Pub/Sub
+
+This is not a fully integrated production system, but a simulation of service communication and messaging behavior.
+
+
+
+
 ---
 
 ## Overview
