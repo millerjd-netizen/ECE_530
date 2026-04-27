@@ -1,36 +1,64 @@
 name: Run Unit Tests
 
-on: [push]
+on:
+  push:
+  pull_request:
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Check out repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
-      - name: Install pytest
-        run: pip install pytest
+      - name: Install shared test tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest fastapi uvicorn redis pillow openai pandas coverage
 
-      - name: Run Assignment 1 tests
+      - name: Test Assignment 1
         run: |
           cd Assignment1_AirportFinder
-          pip install -r requirements.txt
           PYTHONPATH=. pytest
 
-      - name: Run Project 1 tests
+      - name: Test Assignment 2
+        run: |
+          cd Assignment2_ElevatorAPI
+          chmod +x elevator_api.py
+          PYTHONPATH=. pytest
+
+      - name: Test Assignment 3
+        run: |
+          cd Assignment3_PostmanFastAPI
+          PYTHONPATH=. pytest
+
+      - name: Test Assignment 4
+        run: |
+          cd Assignment4_ConcurrencyQueue
+          PYTHONPATH=. pytest
+
+      - name: Test Assignment 5
+        run: |
+          cd Assignment5_SmartHomeDB
+          PYTHONPATH=. pytest
+
+      - name: Test Assignment 6
+        run: |
+          cd Assignment6_PubSubMessagingSystem
+          PYTHONPATH=. pytest
+
+      - name: Test Project 1
         run: |
           cd natural_llm_SQL
-          pip install -r requirements.txt
           PYTHONPATH=. pytest
 
-      - name: Run Project 2 tests
+      - name: Test Project 2
         run: |
           cd EC530-Project2
-          pip install -r requirements.txt
           PYTHONPATH=. pytest
