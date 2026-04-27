@@ -184,3 +184,12 @@ Expected:
 ## Conclusion
 
 This project demonstrates a complete event-driven distributed system using Redis, modeling real-world backend architecture.
+
+
+## Setup and Testing
+
+Install dependencies:
+pip install -r requirements.txt
+
+Run tests:
+PYTHONPATH=. pytest
