@@ -1,58 +1,68 @@
-import sqlite3
+def _normalize_name(name: str) -> str:
+    return name.strip().lower()
 
 
-class QueryResult:
-    def __init__(self, success=True, rows=None, columns=None, sql="", error=None, row_count=None):
-        self.success = success
-        self.rows = rows or []
-        self.columns = columns or []
-        self.sql = sql
-        self.error = error
-        self.row_count = row_count if row_count is not None else len(self.rows)
+def _normalize_type(t: str) -> str:
+    t = t.strip().upper()
+    if "(" in t:
+        t = t.split("(")[0]
 
-    def as_dicts(self):
-        return [dict(zip(self.columns, row)) for row in self.rows]
+    if t in ("TEXT", "VARCHAR", "CHAR", "CLOB"):
+        return "TEXT"
+    if t in ("INTEGER", "INT", "TINYINT", "SMALLINT", "BIGINT", "BOOLEAN"):
+        return "INTEGER"
+    if t in ("REAL", "FLOAT", "DOUBLE"):
+        return "REAL"
+    return "TEXT"
 
 
-class QueryService:
-    def __init__(self, db_path=None, validator=None, schema_manager=None):
-        self.db_path = db_path
-        self.validator = validator
-        self.schema_manager = schema_manager
+class SchemaManager:
+    def list_tables(self, conn):
+        cursor = conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        return sorted([row[0] for row in cursor.fetchall()])
 
-    def execute(self, sql: str):
-        sql = sql.strip()
+    def table_exists(self, conn, name):
+        return name in self.list_tables(conn)
 
-        if not sql:
-            return QueryResult(success=False, error="Empty query.")
+    def get_schema(self, conn, table):
+        if not self.table_exists(conn, table):
+            raise ValueError(f"{table} does not exist")
 
-        # IMPORTANT: validator must be respected
-        if self.validator:
-            result = self.validator.validate(sql, self.db_path)
-            if not result.is_valid:
-                return QueryResult(success=False, error=result.error)
+        cursor = conn.execute(f"PRAGMA table_info({table})")
+        return [
+            {"name": col[1], "type": _normalize_type(col[2]), "pk": col[5]}
+            for col in cursor.fetchall()
+        ]
 
-        try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.execute(sql)
+    def create_table(self, conn, name, columns):
+        if not columns:
+            raise ValueError("empty schema")
 
-            rows = cursor.fetchall()
-            columns = [desc[0] for desc in cursor.description] if cursor.description else []
+        sql_columns = ["id INTEGER PRIMARY KEY"]
+        for col in columns:
+            sql_columns.append(f"{col['name']} {_normalize_type(col['type'])}")
 
-            return QueryResult(True, rows, columns, sql, row_count=len(rows))
+        conn.execute(f"CREATE TABLE {name} ({', '.join(sql_columns)})")
 
-        except Exception as e:
-            return QueryResult(False, error=str(e))
+    def drop_table(self, conn, name):
+        conn.execute(f"DROP TABLE IF EXISTS {name}")
 
-    def list_tables(self):
-        conn = sqlite3.connect(self.db_path)
-        return self.schema_manager.list_tables(conn)
+    def rename_table(self, conn, old, new):
+        if not self.table_exists(conn, old):
+            raise ValueError(f"{old} does not exist")
+        conn.execute(f"ALTER TABLE {old} RENAME TO {new}")
 
-    def get_schema_context(self):
-        conn = sqlite3.connect(self.db_path)
-        tables = self.schema_manager.list_tables(conn)
+    def schemas_compatible(self, existing, incoming):
+        if not existing or not incoming:
+            return False
 
-        return {
-            table: self.schema_manager.get_schema(conn, table)
-            for table in tables
-        }
+        existing_map = {c["name"].lower(): _normalize_type(c["type"]) for c in existing}
+        incoming_map = {c["name"].lower(): _normalize_type(c["type"]) for c in incoming}
+
+        for name, typ in incoming_map.items():
+            if name not in existing_map:
+                return False
+            if existing_map[name] != typ:
+                return False
+
+        return True
