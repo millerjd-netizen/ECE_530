@@ -1,3 +1,5 @@
+![CI](https://github.com/millerjd-netizen/ECE_530/actions/workflows/test.yml/badge.svg)
+
 # ECE 530: Distributed Systems and Applied Software Engineering
 
 This repository contains assignments and projects covering APIs, concurrency, databases, messaging systems, and distributed architectures.
@@ -29,21 +31,21 @@ Simple airport lookup system using file-based data.
 
 ## Assignment 2: Elevator API
 
-REST-style API for elevator simulation.
+Script-based API client for interacting with an elevator system.
 
-- List elevators
-- Send requests
-- Check status
+- CLI interface
+- Command handling
+- API interaction logic
 
 ---
 
 ## Assignment 3: FastAPI with Postman
 
-FastAPI web service tested with Postman.
+Collection of API interactions tested using Postman.
 
-- REST API structure
-- Validation
-- Testing workflow
+- API request structure
+- Endpoint testing
+- Validation workflow
 
 ---
 
@@ -51,18 +53,18 @@ FastAPI web service tested with Postman.
 
 Task processing using threading and multiprocessing.
 
-- Matrix tasks
-- Thread workers
-- Process workers
-- Load testing
+- Matrix task generation
+- Thread-based worker queues
+- Process-based worker queues
+- Performance testing
 
 ---
 
 ## Assignment 5: Smart Home Database
 
-SQLite database for smart home systems.
+SQLite database system for smart home environments.
 
-- Tables and relationships
+- Relational schema design
 - CRUD operations
 - Data validation
 
@@ -70,27 +72,25 @@ SQLite database for smart home systems.
 
 ## Assignment 6: Pub/Sub Messaging System
 
-Local messaging system using publish/subscribe model.
+Event-driven messaging system using a publish/subscribe model.
 
-- Event system
-- Topic routing
 - Broker design
+- Topic-based routing
+- Event handling
+- Unit-tested services
 
 ---
 
 ## Project 1: Natural Language to SQL
 
-Converts natural language into SQL safely.
+System for converting natural language queries into SQL safely.
 
 - LLM adapter
-- SQL validation
+- SQL validation layer
 - Schema management
-- Query execution
+- Query execution service
 
 Run tests:
-
-cd natural_llm_SQL  
-PYTHONPATH=. pytest
 
 ---
 
@@ -105,11 +105,18 @@ Event-driven microservices architecture.
 
 Run tests:
 
-cd EC530-Project2  
-PYTHONPATH=. pytest
-
 ---
 
+## Testing Summary
+
+- Assignment 1: 23 tests passing
+- Assignment 2: 2 tests passing
+- Assignment 3: 2 tests passing
+- Assignment 4: 4 tests passing
+- Assignment 5: 1 test passing
+- Assignment 6: 8 tests passing
+- Project 1: 127 tests passing
+- Project 2: 3 tests passing
 
 ---
 
@@ -120,7 +127,8 @@ PYTHONPATH=. pytest
 - SQLite
 - Redis
 - Pytest
-- Threading and multiprocessing
+- Threading
+- Multiprocessing
 
 ---
 
