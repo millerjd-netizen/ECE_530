@@ -1,7 +1,6 @@
 import os
 import sqlite3
 import sys
-from pathlib import Path
 
 DB_PATH = "demo.db"
 
@@ -76,17 +75,38 @@ def execute_sql(sql):
         print(row)
 
 
-def nl_to_sql(question):
+def simulated_llm_to_sql(question):
+    print("LLM simulated processing:", question)
+
+    q = question.lower()
+
+    if "engineer" in q:
+        return "SELECT * FROM users WHERE role = 'engineer'"
+
+    if "designer" in q:
+        return "SELECT * FROM users WHERE role = 'designer'"
+
+    if "manager" in q:
+        return "SELECT * FROM users WHERE role = 'manager'"
+
+    if "age" in q:
+        return "SELECT name, age FROM users"
+
+    if "tables" in q:
+        return "SELECT name FROM sqlite_master WHERE type = 'table'"
+
+    return "SELECT * FROM users"
+
+
+def real_llm_to_sql(question):
     api_key = os.environ.get("ANTHROPIC_API_KEY")
 
     if not api_key:
-        print("LLM not configured. Set ANTHROPIC_API_KEY first.")
         return None
 
     try:
         import anthropic
     except ImportError:
-        print("anthropic package missing. Run: pip install anthropic")
         return None
 
     client = anthropic.Anthropic(api_key=api_key)
@@ -104,18 +124,32 @@ Return only one SQL SELECT statement. Do not include markdown.
 """
 
     response = client.messages.create(
-        model="claude-3-5-haiku-20241022",
+        model="claude-3-haiku-20240307",
         max_tokens=200,
         messages=[{"role": "user", "content": prompt}],
     )
 
-    sql = response.content[0].text.strip()
-    return sql
+    return response.content[0].text.strip()
+
+
+def nl_to_sql(question):
+    use_real_llm = os.environ.get("USE_REAL_LLM", "").lower() in ["1", "true", "yes"]
+
+    if use_real_llm:
+        sql = real_llm_to_sql(question)
+        if sql:
+            print("LLM real provider used.")
+            return sql
+
+        print("Real LLM unavailable. Falling back to simulated LLM.")
+
+    return simulated_llm_to_sql(question)
 
 
 def status():
     print("Database:", DB_PATH)
     print("Anthropic key configured:", bool(os.environ.get("ANTHROPIC_API_KEY")))
+    print("Real LLM mode:", os.environ.get("USE_REAL_LLM", "false"))
 
 
 def help_text():
@@ -125,6 +159,10 @@ def help_text():
     print("  python cli.py tables")
     print("  python cli.py sql \"SELECT * FROM users\"")
     print("  python cli.py query \"show all users\"")
+    print("")
+    print("Optional real LLM mode:")
+    print("  export USE_REAL_LLM=true")
+    print("  export ANTHROPIC_API_KEY=your_key")
 
 
 def main():
