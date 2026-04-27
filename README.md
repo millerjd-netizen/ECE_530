@@ -1,156 +1,134 @@
-\# ECE 530 – Distributed Systems and Applied Software Engineering
+# ECE 530: Distributed Systems and Applied Software Engineering
 
+This repository contains assignments and projects covering APIs, concurrency, databases, messaging systems, and distributed architectures.
 
+---
 
-This repository contains a complete set of assignments and projects covering core concepts in modern software systems, including APIs, concurrency, databases, messaging systems, and distributed architectures.
+## Repository Contents
 
+- Assignment1_AirportFinder
+- Assignment2_ElevatorAPI
+- Assignment3_PostmanFastAPI
+- Assignment4_ConcurrencyQueue
+- Assignment5_SmartHomeDB
+- Assignment6_PubSubMessagingSystem
+- natural_llm_SQL
+- EC530-Project2
 
+---
 
-\---
+## Assignment 1: Airport Finder
 
+Simple airport lookup system using file-based data.
 
+- File parsing
+- Filtering
+- CLI interaction
 
-\## Repository Structure
+---
 
+## Assignment 2: Elevator API
 
+REST-style API for elevator simulation.
 
-\### Assignment 1 – Airport Finder
+- List elevators
+- Send requests
+- Check status
 
-Implements a simple data lookup system for airport information.
+---
 
+## Assignment 3: FastAPI with Postman
 
+FastAPI web service tested with Postman.
 
-\- File-based querying
+- REST API structure
+- Validation
+- Testing workflow
 
-\- Data parsing and filtering
+---
 
-\- Command-line interface
+## Assignment 4: Concurrency Queue System
 
+Task processing using threading and multiprocessing.
 
+- Matrix tasks
+- Thread workers
+- Process workers
+- Load testing
 
-\---
+---
 
+## Assignment 5: Smart Home Database
 
+SQLite database for smart home systems.
 
-\### Assignment 2 – Elevator API
+- Tables and relationships
+- CRUD operations
+- Data validation
 
-A REST-style API simulating elevator operations.
+---
 
+## Assignment 6: Pub/Sub Messaging System
 
+Local messaging system using publish/subscribe model.
 
-\- Endpoints for listing elevators, sending requests, and checking status
+- Event system
+- Topic routing
+- Broker design
 
-\- Demonstrates API design principles
+---
 
+## Project 1: Natural Language to SQL
 
+Converts natural language into SQL safely.
 
-\---
+- LLM adapter
+- SQL validation
+- Schema management
+- Query execution
 
+Run tests:
 
-
-\### Assignment 3 – FastAPI with Postman
-
-A web API built using FastAPI and tested with Postman.
-
-
-
-\- RESTful API structure
-
-\- Request and response validation
-
-\- API testing workflow
-
-
-
-\---
-
-
-
-\### Assignment 4 – Concurrency Queue System
-
-Implements task processing using threading and multiprocessing.
-
-
-
-\- Matrix-based task generation
-
-\- Thread-based worker queues
-
-\- Process-based worker queues
-
-\- Basic performance comparison
-
-
-
-\---
-
-
-
-\### Assignment 5 – Smart Home Database
-
-A SQLite-based system for managing IoT-style device data.
-
-
-
-\- Table creation and schema handling
-
-\- CRUD operations
-
-\- Data validation
-
-
-
-\---
-
-
-
-\### Assignment 6 – Pub/Sub Messaging System
-
-A local publish/subscribe system.
-
-
-
-\- Publisher-subscriber architecture
-
-\- Topic-based message routing
-
-\- Local broker implementation
-
-
-
-\---
-
-
-
-\## Project 1 – Natural Language to SQL System
-
-
-
-A system that converts natural language into SQL queries safely.
-
-
-
-Features:
-
-\- LLM adapter for query generation
-
-\- SQL validation layer to prevent unsafe queries
-
-\- Schema management
-
-\- Query execution engine
-
-
-
-Testing:
-
-
-
-```bash
-
-pip install -r natural\_llm\_SQL/requirements.txt
-
-cd natural\_llm\_SQL
-
+cd natural_llm_SQL  
 PYTHONPATH=. pytest
 
+---
+
+## Project 2: Microservices Pipeline
+
+Event-driven microservices architecture.
+
+- Upload service
+- Inference service
+- Annotation service
+- Shared event system
+
+Run tests:
+
+cd EC530-Project2  
+PYTHONPATH=. pytest
+
+---
+
+## Testing Summary
+
+- Project 1: 127 tests passing
+- Project 2: All tests passing
+
+---
+
+## Technologies
+
+- Python 3.12
+- FastAPI
+- SQLite
+- Redis
+- Pytest
+- Threading and multiprocessing
+
+---
+
+## Author
+
+Jonathan Miller  
+ECE 530
