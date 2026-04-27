@@ -1,7 +1,7 @@
 import sqlite3
 import pytest
 
-from csv_loader.schema_manager import SchemaManager, _normalize_name, _normalize_type
+from schema_manager import SchemaManager, _normalize_name, _normalize_type
 
 @pytest.fixture
 def sm():

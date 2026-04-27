@@ -3,7 +3,7 @@ import pytest
 from dataclasses import dataclass
 from unittest.mock import MagicMock, patch
 
-from csv_loader.query_service import QueryService, QueryResult
+from query_service import QueryService, QueryResult
 
 @dataclass
 class ValidationResult:

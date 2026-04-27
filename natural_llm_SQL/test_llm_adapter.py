@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
 
-from csv_loader.llm_adapter import (
+from llm_adapter import (
     LLMAdapter,
     AdapterResult,
     build_prompt,

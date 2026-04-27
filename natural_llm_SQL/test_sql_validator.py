@@ -1,7 +1,7 @@
 import sqlite3
 import pytest
 
-from csv_loader.sql_validator import (
+from sql_validator import (
     SQLValidator,
     _extract_table_names,
     _get_existing_tables,
