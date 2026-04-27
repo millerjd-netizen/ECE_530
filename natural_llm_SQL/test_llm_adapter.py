@@ -253,7 +253,7 @@ class TestLLMOutputUntrusted:
         The adapter must ALWAYS go through query_service.execute().
         It must never call sqlite3 or any DB connection itself.
         """
-        import csv_loader.llm_adapter as adapter_module
+        import llm_adapter as adapter_module
         # sqlite3 should not be imported by the adapter at all
         assert "sqlite3" not in dir(adapter_module), (
             "LLMAdapter must not import sqlite3 — SQL execution belongs to QueryService."
