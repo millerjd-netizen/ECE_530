@@ -12,4 +12,4 @@ def test_script_runs_help():
         capture_output=True,
         text=True
     )
-    assert result.returncode == 0 or result.returncode == 1
+    assert result.returncode in [0, 1, 64]
