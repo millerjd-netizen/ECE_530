@@ -110,10 +110,6 @@ PYTHONPATH=. pytest
 
 ---
 
-## Testing Summary
-
-- Project 1: 127 tests passing
-- Project 2: All tests passing
 
 ---
 
