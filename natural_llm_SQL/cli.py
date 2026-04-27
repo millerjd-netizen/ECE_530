@@ -104,7 +104,7 @@ Return only one SQL SELECT statement. Do not include markdown.
 """
 
     response = client.messages.create(
-        model="claude-3-5-haiku-latest",
+        model="claude-3-5-haiku-20241022",
         max_tokens=200,
         messages=[{"role": "user", "content": prompt}],
     )
