@@ -1,11 +1,9 @@
 name: Run Unit Tests
-
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -27,16 +25,19 @@ jobs:
       run: python --version
     
     - name: Install dependencies
+      working-directory: Assignment1_AirportFinder
       run: |
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     
     - name: Run unit tests
+      working-directory: Assignment1_AirportFinder
       run: |
         python -m unittest test_airport_finder -v
     
     - name: Run tests with coverage (Python 3.11 only)
       if: matrix.python-version == '3.11'
+      working-directory: Assignment1_AirportFinder
       run: |
         pip install coverage
         coverage run -m unittest test_airport_finder
