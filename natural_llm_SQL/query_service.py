@@ -1,68 +1,60 @@
-def _normalize_name(name: str) -> str:
-    return name.strip().lower()
+import sqlite3
 
 
-def _normalize_type(t: str) -> str:
-    t = t.strip().upper()
-    if "(" in t:
-        t = t.split("(")[0]
+class QueryResult:
+    def __init__(self, success=True, rows=None, columns=None, sql="", error=None, row_count=None):
+        self.success = success
+        self.rows = rows or []
+        self.columns = columns or []
+        self.sql = sql
+        self.error = error
+        self.row_count = row_count if row_count is not None else len(self.rows)
 
-    if t in ("TEXT", "VARCHAR", "CHAR", "CLOB"):
-        return "TEXT"
-    if t in ("INTEGER", "INT", "TINYINT", "SMALLINT", "BIGINT", "BOOLEAN"):
-        return "INTEGER"
-    if t in ("REAL", "FLOAT", "DOUBLE"):
-        return "REAL"
-    return "TEXT"
+    def as_dicts(self):
+        return [dict(zip(self.columns, row)) for row in self.rows]
 
 
-class SchemaManager:
-    def list_tables(self, conn):
-        cursor = conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
-        return sorted([row[0] for row in cursor.fetchall()])
+class QueryService:
+    def __init__(self, db_path=None, validator=None, schema_manager=None):
+        self.db_path = db_path
+        self.validator = validator
+        self.schema_manager = schema_manager
 
-    def table_exists(self, conn, name):
-        return name in self.list_tables(conn)
+    def execute(self, sql: str):
+        sql = sql.strip()
 
-    def get_schema(self, conn, table):
-        if not self.table_exists(conn, table):
-            raise ValueError(f"{table} does not exist")
+        if not sql:
+            return QueryResult(success=False, error="Empty query.")
 
-        cursor = conn.execute(f"PRAGMA table_info({table})")
-        return [
-            {"name": col[1], "type": _normalize_type(col[2]), "pk": col[5]}
-            for col in cursor.fetchall()
-        ]
+        if self.validator:
+            validation = self.validator.validate(sql, self.db_path)
+            if hasattr(validation, "is_valid"):
+                if not validation.is_valid:
+                    return QueryResult(success=False, error=validation.error)
+            elif validation is False:
+                return QueryResult(success=False, error="Validation failed.")
 
-    def create_table(self, conn, name, columns):
-        if not columns:
-            raise ValueError("empty schema")
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.execute(sql)
 
-        sql_columns = ["id INTEGER PRIMARY KEY"]
-        for col in columns:
-            sql_columns.append(f"{col['name']} {_normalize_type(col['type'])}")
+            rows = cursor.fetchall()
+            columns = [desc[0] for desc in cursor.description] if cursor.description else []
 
-        conn.execute(f"CREATE TABLE {name} ({', '.join(sql_columns)})")
+            return QueryResult(success=True, rows=rows, columns=columns, sql=sql)
 
-    def drop_table(self, conn, name):
-        conn.execute(f"DROP TABLE IF EXISTS {name}")
+        except Exception as e:
+            return QueryResult(success=False, error=str(e), sql=sql)
 
-    def rename_table(self, conn, old, new):
-        if not self.table_exists(conn, old):
-            raise ValueError(f"{old} does not exist")
-        conn.execute(f"ALTER TABLE {old} RENAME TO {new}")
+    def list_tables(self):
+        conn = sqlite3.connect(self.db_path)
+        return self.schema_manager.list_tables(conn)
 
-    def schemas_compatible(self, existing, incoming):
-        if not existing or not incoming:
-            return False
+    def get_schema_context(self):
+        conn = sqlite3.connect(self.db_path)
+        tables = self.schema_manager.list_tables(conn)
 
-        existing_map = {c["name"].lower(): _normalize_type(c["type"]) for c in existing}
-        incoming_map = {c["name"].lower(): _normalize_type(c["type"]) for c in incoming}
-
-        for name, typ in incoming_map.items():
-            if name not in existing_map:
-                return False
-            if existing_map[name] != typ:
-                return False
-
-        return True
+        return {
+            table: self.schema_manager.get_schema(conn, table)
+            for table in tables
+        }
