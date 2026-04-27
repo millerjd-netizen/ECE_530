@@ -10,6 +10,7 @@ class QueryResult:
         self.error = error
         self.row_count = row_count if row_count is not None else len(self.rows)
 
+    @property
     def as_dicts(self):
         return [dict(zip(self.columns, row)) for row in self.rows]
 
