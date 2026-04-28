@@ -58,7 +58,7 @@ def schema_text():
 
 
 def execute_sql(sql):
-    sql = sql.strip()
+    sql = sql.strip().rstrip(";")
 
     if not sql.lower().startswith("select"):
         print("Only SELECT queries are allowed.")
@@ -99,57 +99,63 @@ def simulated_llm_to_sql(question):
 
 
 def real_llm_to_sql(question):
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("OPENAI_API_KEY")
 
     if not api_key:
         return None
 
     try:
-        import anthropic
+        from openai import OpenAI
     except ImportError:
+        print("openai package missing. Run: pip install openai")
         return None
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = OpenAI(api_key=api_key)
 
     prompt = f"""
 You convert natural language questions into safe SQLite SELECT queries.
+
+Rules:
+- Return only one SQL SELECT statement.
+- Do not include markdown.
+- Do not include explanations.
+- Never return INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, or PRAGMA.
+- Use only the schema below.
 
 Database schema:
 {schema_text()}
 
 Question:
 {question}
-
-Return only one SQL SELECT statement. Do not include markdown.
 """
 
-    response = client.messages.create(
-        model="claude-3-haiku-20240307",
-        max_tokens=200,
-        messages=[{"role": "user", "content": prompt}],
-    )
-
-    return response.content[0].text.strip()
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0,
+        )
+        sql = response.choices[0].message.content.strip()
+        print("LLM OpenAI processing:", question)
+        return sql
+    except Exception as exc:
+        print("OpenAI request failed:", exc)
+        return None
 
 
 def nl_to_sql(question):
-    use_real_llm = os.environ.get("USE_REAL_LLM", "").lower() in ["1", "true", "yes"]
+    sql = real_llm_to_sql(question)
 
-    if use_real_llm:
-        sql = real_llm_to_sql(question)
-        if sql:
-            print("LLM real provider used.")
-            return sql
+    if sql:
+        return sql
 
-        print("Real LLM unavailable. Falling back to simulated LLM.")
-
+    print("Real LLM unavailable. Falling back to simulated LLM.")
     return simulated_llm_to_sql(question)
 
 
 def status():
     print("Database:", DB_PATH)
-    print("Anthropic key configured:", bool(os.environ.get("ANTHROPIC_API_KEY")))
-    print("Real LLM mode:", os.environ.get("USE_REAL_LLM", "false"))
+    print("OpenAI key configured:", bool(os.environ.get("OPENAI_API_KEY")))
 
 
 def help_text():
@@ -160,9 +166,8 @@ def help_text():
     print("  python cli.py sql \"SELECT * FROM users\"")
     print("  python cli.py query \"show all users\"")
     print("")
-    print("Optional real LLM mode:")
-    print("  export USE_REAL_LLM=true")
-    print("  export ANTHROPIC_API_KEY=your_key")
+    print("Real LLM mode:")
+    print("  export OPENAI_API_KEY=your_key")
 
 
 def main():
