@@ -1,195 +1,74 @@
-# EC530 Project 2
-## Event-Driven Image Annotation System (Redis Pub/Sub)
-
-
-## ⚠️ Project Scope
-
-This project focuses on defining the messaging skeleton of an event-driven system.
-
-The goal is to:
-- define services
-- define message formats
-- simulate event flow
-- test communication using Redis Pub/Sub
-
-This is not a fully integrated production system, but a simulation of service communication and messaging behavior.
-
-
-
-
----
+# EC530 Project 2: Event-Driven Image Processing Pipeline
 
 ## Overview
+This project implements a distributed, event-driven image processing pipeline using modern data engineering and machine learning concepts.
 
-This project implements a distributed, event-driven image processing pipeline using Redis Pub/Sub.
-
-Instead of direct function calls, independent services communicate asynchronously through events, simulating a real-world microservices architecture.
-
----
-
-## Key Concepts Demonstrated
-
-- Event-driven architecture
-- Redis Pub/Sub messaging
-- Decoupled microservices
-- Asynchronous processing pipeline
-- Logging and observability
-- Unit testing with pytest
-
----
+Upload Service → Inference Service → Annotation Service
 
 ## Architecture
+- Upload Service: simulates image ingestion
+- Inference Service: generates labels and confidence
+- Annotation Service:
+  - creates annotations
+  - generates embeddings
+  - stores vectors in FAISS
+  - saves metadata to MongoDB
 
-Upload Service
-↓ (image.submitted)
-Inference Service
-↓ (inference.completed)
-Annotation Service
+## Technologies
+- Redis (Pub/Sub)
+- MongoDB (Document DB)
+- FAISS (Vector DB)
+- NumPy / Pillow
+- Pytest
 
----
+## Data Flow
+1. Image uploaded (simulated)
+2. Inference assigns label + confidence
+3. Annotation service:
+   - generates embedding
+   - stores in FAISS
+   - saves to MongoDB
 
-## Event Flow
+## Features
+- Simulation (random images)
+- Embeddings (image → vector)
+- FAISS similarity search
+- MongoDB storage
+- Event-driven architecture
 
-1. Upload Service
-   Publishes event: image.submitted
-
-2. Inference Service
-   Subscribes to image.submitted
-   Simulates inference
-   Publishes inference.completed
-
-3. Annotation Service
-   Subscribes to inference.completed
-   Produces final annotation
-
----
-
-## Project Structure
-
-EC530-Project2/
-- services/
-  - upload_service.py
-  - inference_service.py
-  - annotation_service.py
-- shared/
-  - redis_client.py
-  - events.py
-  - logger.py
-- tests/
-  - test_events.py
-  - test_annotation_format.py
-- logs/
-  - project.log
-- .env
-- README.md
-
----
-
-## Setup Instructions
-
-Create virtual environment:
-
-python -m venv venv
-venv\Scripts\activate
+## Setup
 
 Install dependencies:
+pip install -r requirements.txt
+pip install faiss-cpu pymongo numpy
 
-pip install redis python-dotenv pytest
+Start Redis:
+redis-server
 
----
+Start MongoDB (optional):
+mongod
 
-## Environment Variables
+## Run Services
 
-Create a .env file:
+python services/upload_service.py
+python services/inference_service.py
+python services/annotation_service.py
 
-REDIS_HOST=your_host
-REDIS_PORT=your_port
-REDIS_USERNAME=default
-REDIS_PASSWORD=your_password
+## Run Tests
 
----
-
-## Running the System
-
-Open 3 terminals.
-
-Terminal 1:
-python -m services.inference_service
-
-Terminal 2:
-python -m services.annotation_service
-
-Terminal 3:
-python -m services.upload_service
-
----
-
-## Expected Output
-
-Upload Service:
-Upload Service published: {...}
-
-Inference Service:
-INFO | received event
-INFO | published inference result
-
-Annotation Service:
-INFO | received inference
-INFO | final annotation
-
----
-
-## Logging
-
-Logs are written to:
-
-logs/project.log
-
-Includes timestamps, service names, and events.
-
----
-
-## Testing
-
-Run:
-
-set PYTHONPATH=.
-pytest tests
+pytest
 
 Expected:
 3 passed
 
----
+## Requirements Coverage
 
-## Design Decisions
+- Pub/Sub (Redis): YES
+- Document DB (MongoDB): YES
+- Simulation: YES
+- Embeddings: YES
+- FAISS (A-level): YES
 
-- Services communicate only via Redis
-- No direct coupling between components
-- Event-driven model improves scalability
-- Logging added for observability
-- Error handling prevents crashes
-
----
-
-## Future Improvements
-
-- Add real ML inference
-- Add retry logic
-- Use Redis Streams
-- Dockerize services
-- Add CLI interface
-
----
-
-## Conclusion
-
-This project demonstrates a complete event-driven distributed system using Redis, modeling real-world backend architecture.
-
-
-## Setup and Testing
-
-Install dependencies:
-pip install -r requirements.txt
-
-Run tests:
-PYTHONPATH=. pytest
+## Author
+Joseph Miller
+Boston University EC530
