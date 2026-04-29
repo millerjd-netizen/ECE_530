@@ -1,55 +1,54 @@
+from shared.embedding_service import compute_embedding
+from shared.faiss_index import FaissIndex
+from shared.simulator import generate_random_image
 from shared.events import subscribe_to, parse_message
 from shared.logger import get_logger
 
-
-##  this imports teh logging so the services can print the logs to make it easier to follow
-
-
+# Logger for debugging and tracing service behavior
 logger = get_logger(__name__)
 
-
-## this defines the main function that runs all of the services. Services are upload, infernece, annotaiton. 
+# Initialize FAISS index (vector DB)
+IMAGE_DIM = 64 * 64 * 3
+index = FaissIndex(dim=IMAGE_DIM)
 
 
 def main():
+    """
+    Annotation Service:
+    - Listens for completed inference events
+    - Generates annotations
+    - Computes embeddings
+    - Stores embeddings in FAISS for similarity search
+    """
 
-# defines the main function
-    
+    # Subscribe to Redis pub/sub channel
     pubsub = subscribe_to("inference.completed")
 
-# this is a function taht connects to reddis and starts listening ofr messages on teh infenreces.completed channel
-
-    
-# this is using a function that is insode of the shared folder. 
-
-    
     logger.info("Annotation Service listening on inference.completed...")
 
-#this logs a message to show that the service has started and is listening for infrenece result. inference = figuring something out from data. 
-
-
     for message in pubsub.listen():
-
-# Try to process the message safely without crashing. 
         try:
-
-# this logic is to try to run this code without it crashing.
-
-            
             event = parse_message(message)
 
-# turns raw messages into strucutres events. that what parsing does
-
-
-            
+            # Skip invalid / empty messages
             if event is None:
                 continue
-                
-# if theres nothing it just skips
 
-            
-            logger.info("Annotation Service received: %s", event)
+            logger.info("Received event: %s", event)
 
+            # --- STEP 1: Generate or load image ---
+            # (Using simulation for MVP — can replace with real image loading)
+            image = generate_random_image()
+
+            # --- STEP 2: Compute embedding ---
+            embedding = compute_embedding(image)
+
+            # --- STEP 3: Store in FAISS ---
+            index.add(embedding)
+
+            logger.info("Stored embedding in FAISS index")
+
+            # --- STEP 4: Create annotation ---
             annotation = {
                 "event_id": event["event_id"],
                 "image_id": event["image_id"],
@@ -59,6 +58,11 @@ def main():
             }
 
             logger.info("Final annotation: %s", annotation)
+
+            # --- OPTIONAL: similarity search demo ---
+            distances, indices = index.search(embedding, k=3)
+
+            logger.info("Nearest neighbors (FAISS): %s", indices.tolist())
 
         except Exception as e:
             logger.exception("Annotation Service failed: %s", e)
