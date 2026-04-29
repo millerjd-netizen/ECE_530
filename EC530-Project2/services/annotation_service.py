@@ -1,3 +1,4 @@
+from shared.mongo_service import save_annotation
 from shared.embedding_service import compute_embedding
 from shared.faiss_index import FaissIndex
 from shared.simulator import generate_random_image
@@ -19,6 +20,7 @@ def main():
     - Generates annotations
     - Computes embeddings
     - Stores embeddings in FAISS for similarity search
+    - Saves annotations to MongoDB
     """
 
     # Subscribe to Redis pub/sub channel
@@ -37,7 +39,6 @@ def main():
             logger.info("Received event: %s", event)
 
             # --- STEP 1: Generate or load image ---
-            # (Using simulation for MVP — can replace with real image loading)
             image = generate_random_image()
 
             # --- STEP 2: Compute embedding ---
@@ -45,7 +46,6 @@ def main():
 
             # --- STEP 3: Store in FAISS ---
             index.add(embedding)
-
             logger.info("Stored embedding in FAISS index")
 
             # --- STEP 4: Create annotation ---
@@ -59,9 +59,15 @@ def main():
 
             logger.info("Final annotation: %s", annotation)
 
+            # --- STEP 5: Save to MongoDB (SAFE) ---
+            try:
+                save_annotation(annotation)
+                logger.info("Saved annotation to MongoDB")
+            except Exception as db_error:
+                logger.warning("MongoDB not available: %s", db_error)
+
             # --- OPTIONAL: similarity search demo ---
             distances, indices = index.search(embedding, k=3)
-
             logger.info("Nearest neighbors (FAISS): %s", indices.tolist())
 
         except Exception as e:
